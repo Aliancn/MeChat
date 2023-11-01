@@ -14,6 +14,7 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSubmit">登录</el-button>
+          <el-button type="primary" @click="">注册</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -23,7 +24,8 @@
 <script>
 import {userStore} from "../store/index.js";
 import router from "../router/index.js";
-
+import axios from 'axios'
+import {API_URL_DEV_LOGIN, API_URL_LOGIN} from "@/utils/api.js";
 export default {
   setup(){
     const store = userStore()
@@ -54,9 +56,7 @@ export default {
         if (valid) {
           // 在这里处理登录逻辑
           if (this.loginCheck(this.loginForm)) {
-            // this.getUser();
-            console.log(this.getUser)
-            router.push('/chat')
+            // router.push('/chat')
             alert('登录成功');
           }
         } else {
@@ -64,16 +64,30 @@ export default {
         }
       });
     },
-    loginCheck(loginForm) {
-      console.log(loginForm,'\n',"this is in loginCheck");
-      const user ={
-        id: loginForm.id,
-        password: loginForm.password,
-        name : "jerry",
-        avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
+    async loginCheck(loginForm) {
+      try{
+        console.log(loginForm,'\n',"this is in loginCheck");
+        const response = await axios.post(API_URL_DEV_LOGIN,{
+          username : loginForm.username,
+          password : loginForm.password,
+        });
+        if (response.data.code === 200){
+          console.log("axios send login form" ,response.data);
+          this.store.setUser({
+            id : 1,
+            name: loginForm.username,
+            avatar : 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
+          });
+          return true;
+        }
+        else {
+          return false;
+        }
       }
-      this.store.setUser(user);
-      return true;
+      catch (error){
+        console.log("login fail ", error);
+        return false;
+      }
     }
   }
 };
