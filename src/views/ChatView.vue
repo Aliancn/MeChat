@@ -26,15 +26,40 @@
 </template>
 
 <script>
+import axios from "axios";
+import {chatStore} from "@/store/index.js";
+import {API_URL_DEV_CHAT_HISTORY, API_URL_DEV_CHAT_HISTORY_MOCK} from "@/utils/api.js";
+
 export default {
+  setup() {
+    const store = chatStore();
+
+    return {
+      store
+    }
+  },
   data() {
     return {
       messages: [
-        { id: 1, sender: 'Alice', content: '你好！', timestamp: '2023-10-29 10:00', avatar: 'alice.jpg' },
+        { id: 1, sender: 'Alice', content: '你好！', timestamp: '2023-12-10 06:55:31', avatar: '' },
         // 其他消息...
       ],
       newMessage: '',
     };
+  },
+  mounted() {
+    // TODO: 从服务器获取历史消息
+    this.getHistory()
+    // TODO: 连接 WebSocket 服务器
+    this.connect()
+    // TODO: 监听 WebSocket 服务器的消息
+    this.listen()
+    // 监听 WebSocket 服务器的连接状态
+    // this.listenStatus()
+    // 监听 WebSocket 服务器的错误
+    // this.listenError()
+    // 监听 WebSocket 服务器的关闭
+    // this.listenClose()
   },
   methods: {
     sendMessage() {
@@ -50,6 +75,29 @@ export default {
         this.newMessage = ''; // 清空输入框
       }
     },
+    getHistory(){
+      let d = new Date('2023-07-25T23:30:00Z');
+      axios.get(API_URL_DEV_CHAT_HISTORY_MOCK,{
+        params: {
+          time : d
+        }
+      }).then(res => {
+        if (res.status === 200) {
+          this.store.setChat(res.data.messages)
+          this.messages = res.data.messages;
+        }
+      }).catch(err => {
+        console.log("get chatList history fail" ,err);
+      });
+    },
+    listen() {
+
+    },
+    connect(){
+
+    },
+
+
   },
 };
 </script>

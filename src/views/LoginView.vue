@@ -14,7 +14,7 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSubmit">登录</el-button>
-          <el-button type="primary" @click="">注册</el-button>
+          <el-button type="primary" @click="handleRegister">注册</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -25,7 +25,8 @@
 import {userStore} from "../store/index.js";
 import router from "../router/index.js";
 import axios from 'axios'
-import {API_URL_DEV_LOGIN, API_URL_LOGIN} from "@/utils/api.js";
+import {API_TEMP_TEST, API_URL_DEV_LOGIN, API_URL_LOGIN} from "@/utils/api.js";
+import {GetItemWithExpiration, SetItemWithExpiration} from "@/utils/localstorage.js";
 export default {
   setup(){
     const store = userStore()
@@ -54,40 +55,41 @@ export default {
     handleSubmit() {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
-          // 在这里处理登录逻辑
-          if (this.loginCheck(this.loginForm)) {
-            // router.push('/chat')
-            alert('登录成功');
-          }
-        } else {
-          return false;
+          this.loginCheck(this.loginForm).then(res => {
+            console.log("res", res)
+            if (res) {
+              router.push({path: '/home'});
+            }
+          }).catch(err => {
+            console.log("login fail" ,err);
+          });
         }
       });
     },
     async loginCheck(loginForm) {
       try{
-        console.log(loginForm,'\n',"this is in loginCheck");
+        // console.log(loginForm,"this is in loginCheck");
         const response = await axios.post(API_URL_DEV_LOGIN,{
           username : loginForm.username,
           password : loginForm.password,
         });
-        if (response.data.code === 200){
-          console.log("axios send login form" ,response.data);
+        console.log(response);
+        if (response.status === 200){
           this.store.setUser({
-            id : 1,
-            name: loginForm.username,
-            avatar : 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
+            id : response.data.id,
+            name: response.data.username,
+            token: response.data.token,
+            avatar : response.data.avatar,
           });
           return true;
         }
-        else {
-          return false;
-        }
+        else return false ;
+      } catch (error){
+        throw error;
       }
-      catch (error){
-        console.log("login fail ", error);
-        return false;
-      }
+    },
+    handleRegister(){
+
     }
   }
 };
