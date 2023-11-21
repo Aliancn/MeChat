@@ -53,10 +53,11 @@ export default {
   },
   methods: {
     handleSubmit() {
+      // 参数合法性校验
       this.$refs.loginForm.validate(valid => {
         if (valid) {
+          // 登陆信息校验
           this.loginCheck(this.loginForm).then(res => {
-            console.log("res", res)
             if (res) {
               router.push({path: '/home'});
             }
@@ -68,6 +69,7 @@ export default {
     },
     async loginCheck(loginForm) {
       try{
+        // 登陆信息校验，成功返回true 失败返回false
         // console.log(loginForm,"this is in loginCheck");
         const response = await axios.post(API_URL_DEV_LOGIN,{
           username : loginForm.username,
